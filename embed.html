@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>Embed — SBA 7(a) Business Acquisition Calculator</title>
+		<style>
+			html, body { margin: 0; padding: 0; background: transparent; }
+			.wrap { width: 100%; }
+			iframe {
+				width: 100%;
+				border: 0;
+				display: block;
+				overflow: hidden;
+				background: transparent;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<iframe
+				id="widgetFrame"
+				src="./index.html"
+				title="SBA 7(a) Business Acquisition Calculator"
+				scrolling="no"
+				loading="lazy"
+				allow="clipboard-write"
+			></iframe>
+		</div>
+
+		<script>
+			const frame = document.getElementById("widgetFrame");
+
+			function setHeight(h) {
+				if (!h || !Number.isFinite(h)) return;
+				const px = Math.max(420, Math.min(h + 8, 4000)); // guardrails
+				frame.style.height = px + "px";
+			}
+
+			window.addEventListener("message", (event) => {
+				const data = event?.data;
+				if (!data || data.type !== "mc_widget_height") return;
+				setHeight(Number(data.height));
+			});
+
+			// Fallback height in case postMessage is blocked
+			setHeight(900);
+		</script>
+	</body>
+</html>
