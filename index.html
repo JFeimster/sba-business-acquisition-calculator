@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>SBA 7(a) Business Acquisition Calculator</title>
+		<link rel="stylesheet" href="./style.css" />
+	</head>
+	<body>
+		<div class="app" id="app">
+			<header class="header">
+				<div class="brand">
+					<div class="brand__mark">MC</div>
+					<div class="brand__text">
+						<div class="brand__title">SBA 7(a) Business Acquisition Calculator</div>
+						<div class="brand__subtitle">
+							Estimate affordability, payment, and DSCR for an acquisition. (Educational — not a loan offer.)
+						</div>
+					</div>
+				</div>
+
+				<div class="header__actions">
+					<a class="btn btn--ghost" id="btnReset" href="#">Reset</a>
+				</div>
+			</header>
+
+			<main class="grid">
+				<section class="card">
+					<h2 class="card__title">Inputs</h2>
+
+					<div class="form">
+						<div class="field">
+							<label for="purchasePrice">Purchase price</label>
+							<div class="control">
+								<span class="prefix">$</span>
+								<input id="purchasePrice" inputmode="decimal" type="text" value="1250000" />
+							</div>
+							<div class="hint">Total acquisition price (assets or stock deal, as applicable).</div>
+						</div>
+
+						<div class="field field--inline">
+							<label for="downPct">Down payment</label>
+							<div class="control">
+								<input id="downPct" inputmode="decimal" type="text" value="10" />
+								<span class="suffix">%</span>
+							</div>
+							<div class="hint">Common SBA minimum is often ~10% (varies by deal). Use your assumption.</div>
+						</div>
+
+						<div class="field">
+							<label for="sellerNotePct">Seller note (optional)</label>
+							<div class="control">
+								<input id="sellerNotePct" inputmode="decimal" type="text" value="0" />
+								<span class="suffix">% of price</span>
+							</div>
+							<div class="hint">If present, we assume it reduces the SBA loan amount (for modeling simplicity).</div>
+						</div>
+
+						<div class="field">
+							<label for="ebitda">Target EBITDA / SDE (annual)</label>
+							<div class="control">
+								<span class="prefix">$</span>
+								<input id="ebitda" inputmode="decimal" type="text" value="400000" />
+							</div>
+							<div class="hint">Use EBITDA for larger companies; SDE for owner-operator small deals.</div>
+						</div>
+
+						<div class="field">
+							<label for="addBacksPct">Add-backs confidence adjustment</label>
+							<div class="control">
+								<select id="addBacksPct">
+									<option value="0">High confidence (0% haircut)</option>
+									<option value="10" selected>Medium confidence (10% haircut)</option>
+									<option value="20">Low confidence (20% haircut)</option>
+								</select>
+							</div>
+							<div class="hint">Conservatively reduces cash flow if add-backs are uncertain.</div>
+						</div>
+
+						<div class="field field--inline">
+							<label for="dscrTarget">DSCR target</label>
+							<div class="control">
+								<select id="dscrTarget">
+									<option value="1.15">1.15</option>
+									<option value="1.25" selected>1.25</option>
+									<option value="1.35">1.35</option>
+								</select>
+							</div>
+							<div class="hint">Debt Service Coverage Ratio = cash flow ÷ annual debt service.</div>
+						</div>
+
+						<div class="field field--inline">
+							<label for="interestRate">Interest rate (assumption)</label>
+							<div class="control">
+								<input id="interestRate" inputmode="decimal" type="text" value="10.5" />
+								<span class="suffix">% APR</span>
+							</div>
+							<div class="hint">Use an estimate; SBA rates vary. This is for planning only.</div>
+						</div>
+
+						<div class="field field--inline">
+							<label for="termYears">Loan term</label>
+							<div class="control">
+								<input id="termYears" inputmode="numeric" type="text" value="10" />
+								<span class="suffix">years</span>
+							</div>
+							<div class="hint">SBA acquisition terms commonly ~10 years (varies).</div>
+						</div>
+
+						<div class="field field--inline">
+							<label for="otherDebtService">Other annual debt service (optional)</label>
+							<div class="control">
+								<span class="prefix">$</span>
+								<input id="otherDebtService" inputmode="decimal" type="text" value="0" />
+							</div>
+							<div class="hint">If the business has existing debt you’ll assume/keep, model it here.</div>
+						</div>
+
+						<div class="field field--inline">
+							<label for="ownerWage">Owner wage / replacement (annual)</label>
+							<div class="control">
+								<span class="prefix">$</span>
+								<input id="ownerWage" inputmode="decimal" type="text" value="0" />
+							</div>
+							<div class="hint">Optional. If you want to be conservative, subtract a manager/owner salary.</div>
+						</div>
+
+						<div class="field">
+							<label for="notes">Notes (optional)</label>
+							<textarea id="notes" rows="3" placeholder="e.g., “Includes $150k inventory”, “Seller note 5 years interest-only”…"></textarea>
+						</div>
+
+						<div class="divider"></div>
+
+						<div class="ctaRow">
+							<a class="btn btn--primary" id="btnCopySummary" href="#">Copy summary</a>
+							<a class="btn" id="btnEmail" href="#">Get help with this deal</a>
+						</div>
+
+						<div class="disclaimer">
+							<strong>Disclaimer:</strong> This tool is for educational planning only and does not constitute an offer, approval, or commitment to lend.
+							Actual SBA eligibility, rates, fees, and underwriting requirements vary by lender and borrower profile.
+						</div>
+					</div>
+				</section>
+
+				<section class="card">
+					<h2 class="card__title">Results</h2>
+
+					<div class="kpis">
+						<div class="kpi">
+							<div class="kpi__label">Estimated SBA loan amount</div>
+							<div class="kpi__value" id="kpiLoanAmt">$—</div>
+						</div>
+						<div class="kpi">
+							<div class="kpi__label">Estimated monthly payment</div>
+							<div class="kpi__value" id="kpiMonthly">$—</div>
+						</div>
+						<div class="kpi">
+							<div class="kpi__label">Estimated DSCR</div>
+							<div class="kpi__value" id="kpiDscr">—</div>
+						</div>
+					</div>
+
+					<div class="panel" id="verdictPanel">
+						<div class="panel__title" id="verdictTitle">—</div>
+						<div class="panel__body" id="verdictBody">Adjust inputs to see an affordability verdict.</div>
+					</div>
+
+					<div class="tableWrap">
+						<table class="table">
+							<tbody>
+								<tr>
+									<td>Effective cash flow (after adjustment)</td>
+									<td class="right" id="rowCashFlow">$—</td>
+								</tr>
+								<tr>
+									<td>Annual debt service (SBA loan)</td>
+									<td class="right" id="rowAnnualDebt">$—</td>
+								</tr>
+								<tr>
+									<td>Other annual debt service</td>
+									<td class="right" id="rowOtherDebt">$—</td>
+								</tr>
+								<tr>
+									<td>Total annual debt service</td>
+									<td class="right" id="rowTotalDebt">$—</td>
+								</tr>
+								<tr>
+									<td>Max annual debt service allowed (per DSCR target)</td>
+									<td class="right" id="rowMaxDebt">$—</td>
+								</tr>
+								<tr>
+									<td>Headroom (max allowed − total debt)</td>
+									<td class="right" id="rowHeadroom">$—</td>
+								</tr>
+								<tr>
+									<td>Implied max purchase price (rough)</td>
+									<td class="right" id="rowMaxPrice">$—</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="callouts">
+						<div class="callout">
+							<div class="callout__title">Document checklist (starter)</div>
+							<ul class="list" id="docList">
+								<li>LOI / signed term sheet</li>
+								<li>3 years business tax returns + interim financials</li>
+								<li>Trailing 12-month P&L + balance sheet</li>
+								<li>Debt schedule (existing loans, leases, cards)</li>
+								<li>AP/AR aging (if applicable)</li>
+								<li>Bank statements (business + personal)</li>
+								<li>Resume / management experience summary</li>
+							</ul>
+						</div>
+
+						<div class="callout">
+							<div class="callout__title">Notes</div>
+							<div class="muted" id="notesEcho">—</div>
+						</div>
+					</div>
+
+					<div class="footerNote muted">
+						Tip: use “Other annual debt service” to model leases, equipment loans, or other obligations that reduce coverage.
+					</div>
+				</section>
+			</main>
+		</div>
+
+		<script src="./script.js"></script>
+	</body>
+</html>
